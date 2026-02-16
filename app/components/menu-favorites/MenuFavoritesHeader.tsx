@@ -28,10 +28,13 @@ export default function MenuFavoritesHeader() {
       </div>
 
       {/* CTA desktop */}
-      <button className="hidden md:flex group items-center gap-2 text-sm font-black border-2 border-slate-900 px-6 py-3 rounded-full bg-white text-slate-900 shadow-[4px_4px_0_#1A1A1A] hover:shadow-[2px_2px_0_#1A1A1A] hover:translate-x-[2px] hover:translate-y-[2px] transition-all">
+      <a
+        href="#menu-full"
+        className="hidden md:flex group items-center gap-2 text-sm font-black border-2 border-slate-900 px-6 py-3 rounded-full bg-white text-slate-900 shadow-[4px_4px_0_#1A1A1A] hover:shadow-[2px_2px_0_#1A1A1A] hover:translate-x-[2px] hover:translate-y-[2px] transition-all active:translate-x-[3px] active:translate-y-[3px]"
+      >
         LIHAT MENU LENGKAP
         <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-      </button>
+      </a>
     </div>
   );
 }

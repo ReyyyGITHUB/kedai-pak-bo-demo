@@ -1,8 +1,15 @@
-import { Flame, Plus } from "lucide-react";
+"use client";
+
+import { Flame, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import type { MenuItem } from "./menuFavoritesData";
+import { useCart } from "../cart/CartProvider";
 
 export default function MenuFavoritesCard({ item }: { item: MenuItem }) {
+  const { items, addItem, setQty } = useCart();
+  const current = items.find((i) => i.id === `fav-${item.id}`);
+  const qty = current?.qty ?? 0;
+
   return (
     <div className="group relative flex flex-col h-full bg-white border-2 border-slate-900 rounded-2xl p-3 shadow-[6px_6px_0_#1A1A1A] hover:shadow-[10px_10px_0_#1A1A1A] hover:-translate-y-1 transition-all duration-300">
       {/* Badge Best Seller */}
@@ -55,9 +62,49 @@ export default function MenuFavoritesCard({ item }: { item: MenuItem }) {
               </span>
             </div>
 
-            <button className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-900 text-white hover:bg-orange-600 hover:scale-110 border-2 border-slate-900 transition-all duration-200 shadow-[2px_2px_0_#ccc]">
-              <Plus size={20} strokeWidth={3} />
-            </button>
+            <div className="flex items-center gap-2">
+              {qty > 0 ? (
+                <div className="flex items-center gap-2 border-2 border-slate-900 rounded-full px-2 py-1 bg-white shadow-[2px_2px_0_#1A1A1A]">
+                  <button
+                    onClick={() => setQty(`fav-${item.id}`, qty - 1)}
+                    className="w-7 h-7 flex items-center justify-center rounded-full border-2 border-slate-900"
+                    aria-label="Kurangi jumlah"
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <span className="text-sm font-black min-w-[18px] text-center">
+                    {qty}
+                  </span>
+                  <button
+                    onClick={() =>
+                      addItem({
+                        id: `fav-${item.id}`,
+                        name: item.name,
+                        price: item.priceValue,
+                      })
+                    }
+                    className="w-7 h-7 flex items-center justify-center rounded-full border-2 border-slate-900 bg-orange-600 text-white"
+                    aria-label="Tambah jumlah"
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() =>
+                    addItem({
+                      id: `fav-${item.id}`,
+                      name: item.name,
+                      price: item.priceValue,
+                    })
+                  }
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-900 text-white hover:bg-orange-600 border-2 border-slate-900 shadow-[2px_2px_0_#ccc]"
+                  aria-label="Tambah pesanan"
+                >
+                  <Plus size={20} strokeWidth={3} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

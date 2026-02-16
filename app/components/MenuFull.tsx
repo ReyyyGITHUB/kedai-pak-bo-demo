@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
-import { Search, UtensilsCrossed, ArrowRight } from "lucide-react";
+import { Search, UtensilsCrossed, ArrowRight, Minus, Plus } from "lucide-react";
+import { useCart } from "./cart/CartProvider";
+import Link from "next/link";
+import { calcTotal, formatRupiah } from "./cart/cartTypes";
 
 // DATA: Dikelompokkan berdasarkan kategori untuk memudahkan navigasi
 const menuCategories = [
@@ -13,26 +16,41 @@ const menuCategories = [
 ];
 
 const items = [
-  { id: 1, category: "nasgor", name: "Nasi Goreng Spesial", desc: "Toping komplit ayam + telur.", price: "Rp 18.000", img: "/images/pak-bo.png" },
-  { id: 2, category: "nasgor", name: "Nasi Goreng Gila", desc: "Pedas, sosis, bakso melimpah.", price: "Rp 19.000", img: "/images/pak-bo.png" },
-  { id: 3, category: "nasgor", name: "Nasi Goreng Seafood", desc: "Udang & cumi fresh.", price: "Rp 22.000", img: "/images/pak-bo.png" },
-  { id: 4, category: "bakmi", name: "Bakmi Goreng Jawa", desc: "Manis gurih, masak arang.", price: "Rp 17.000", img: "/images/pak-bo.png" },
-  { id: 5, category: "bakmi", name: "Bakmi Godog Kental", desc: "Kuah telur bebek creamy.", price: "Rp 16.000", img: "/images/pak-bo.png" },
-  { id: 6, category: "bakmi", name: "Mie Ayam Spesial", desc: "Ayam cincang jamur manis.", price: "Rp 17.000", img: "/images/pak-bo.png" },
-  { id: 7, category: "ricebowl", name: "Nasi Ayam Teriyaki", desc: "Saus manis gurih jepang.", price: "Rp 20.000", img: "/images/pak-bo.png" },
-  { id: 8, category: "ricebowl", name: "Nasi Telur Crispy", desc: "Telur dadar keriting viral.", price: "Rp 15.000", img: "/images/pak-bo.png" },
+  { id: 1, category: "nasgor", name: "Nasi Goreng Spesial", desc: "Toping komplit ayam + telur.", price: "Rp 18.000", priceValue: 18000, img: "/images/pak-bo.png" },
+  { id: 2, category: "nasgor", name: "Nasi Goreng Gila", desc: "Pedas, sosis, bakso melimpah.", price: "Rp 19.000", priceValue: 19000, img: "/images/pak-bo.png" },
+  { id: 3, category: "nasgor", name: "Nasi Goreng Seafood", desc: "Udang & cumi fresh.", price: "Rp 22.000", priceValue: 22000, img: "/images/pak-bo.png" },
+  { id: 4, category: "bakmi", name: "Bakmi Goreng Jawa", desc: "Manis gurih, masak arang.", price: "Rp 17.000", priceValue: 17000, img: "/images/pak-bo.png" },
+  { id: 5, category: "bakmi", name: "Bakmi Godog Kental", desc: "Kuah telur bebek creamy.", price: "Rp 16.000", priceValue: 16000, img: "/images/pak-bo.png" },
+  { id: 6, category: "bakmi", name: "Mie Ayam Spesial", desc: "Ayam cincang jamur manis.", price: "Rp 17.000", priceValue: 17000, img: "/images/pak-bo.png" },
+  { id: 7, category: "ricebowl", name: "Nasi Ayam Teriyaki", desc: "Saus manis gurih jepang.", price: "Rp 20.000", priceValue: 20000, img: "/images/pak-bo.png" },
+  { id: 8, category: "ricebowl", name: "Nasi Telur Crispy", desc: "Telur dadar keriting viral.", price: "Rp 15.000", priceValue: 15000, img: "/images/pak-bo.png" },
 ];
 
 export default function MenuFull() {
   const [activeCategory, setActiveCategory] = useState("all");
+  const [search, setSearch] = useState("");
+  const [isRouting, setIsRouting] = useState(false);
+  const { items: cartItems, addItem, setQty } = useCart();
 
   // LOGIC: Filter item berdasarkan kategori yang dipilih
-  const filteredItems = activeCategory === "all" 
-    ? items 
-    : items.filter((item) => item.category === activeCategory);
+  const filteredItems = useMemo(() => {
+    const byCategory =
+      activeCategory === "all"
+        ? items
+        : items.filter((item) => item.category === activeCategory);
+    const q = search.trim().toLowerCase();
+    if (!q) return byCategory;
+    return byCategory.filter((item) => {
+      const hay = `${item.name} ${item.desc}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [activeCategory, search]);
+
+  const total = calcTotal(cartItems);
+  const itemCount = cartItems.reduce((sum, i) => sum + i.qty, 0);
 
   return (
-    <section className="relative bg-[#F3F0EA] text-[#1A1A1A] py-16 md:py-24 border-t-2 border-slate-900 border-dashed">
+    <section id="menu-full" className="relative bg-[#F3F0EA] text-[#1A1A1A] py-16 md:py-24 border-t-2 border-slate-900 border-dashed">
       
       {/* --- DECORATION: Paper Texture --- */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
@@ -62,11 +80,33 @@ export default function MenuFull() {
             <input 
               type="text" 
               placeholder="Cari menu kesukaan..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="w-full md:w-80 bg-white border-2 border-slate-900 rounded-full py-3 px-5 pl-12 font-bold placeholder:text-slate-400 focus:outline-none focus:shadow-[4px_4px_0_#1A1A1A] transition-shadow"
             />
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-900" size={20} />
           </div>
         </div>
+
+        {itemCount > 0 && (
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 w-[92%] max-w-md flex items-center justify-between bg-white/20 backdrop-blur border-2 border-slate-900 rounded-full px-4 py-2 shadow-[3px_3px_0_#1A1A1A] cart-float">
+            <span className="text-xs md:text-sm font-black">
+              Keranjang: {itemCount} item · {formatRupiah(total)}
+            </span>
+            <Link
+              href="/checkout"
+              onClick={() => setIsRouting(true)}
+              className={`text-xs md:text-sm font-black border-2 border-slate-900 px-4 py-1.5 rounded-full flex items-center gap-2 ${
+                isRouting ? "bg-slate-900 text-white" : "bg-orange-600 text-white"
+              }`}
+            >
+              {isRouting && (
+                <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              )}
+              {isRouting ? "Loading" : "Ke Checkout"}
+            </Link>
+          </div>
+        )}
 
         {/* --- STICKY CATEGORY TABS --- */}
         {/* UX: Sticky top biar user gampang ganti kategori pas scroll */}
@@ -90,9 +130,21 @@ export default function MenuFull() {
         {/* --- LIST LAYOUT (Perubahan Utama) --- */}
         {/* Menggunakan grid 1 kolom (List) atau 2 kolom di layar besar, beda dengan section sebelumnya */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-6">
-          {filteredItems.map((item, index) => (
+          {filteredItems.map((item) => {
+            const cartId = `full-${item.id}`;
+            const current = cartItems.find((i) => i.id === cartId);
+            const qty = current?.qty ?? 0;
+
+            return (
             <div 
               key={item.id}
+              onClick={() =>
+                addItem({
+                  id: cartId,
+                  name: item.name,
+                  price: item.priceValue,
+                })
+              }
               className="group flex items-center justify-between p-4 border-b-2 border-slate-300 hover:border-slate-900 hover:bg-white/80 transition-colors duration-300 cursor-pointer"
             >
               {/* KIRI: Info Menu */}
@@ -129,18 +181,83 @@ export default function MenuFull() {
                   {item.price}
                 </span>
 
-                {/* Add Button (Icon Only) */}
-                <button className="w-10 h-10 flex items-center justify-center rounded-full border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white transition-colors">
-                  <ArrowRight size={20} className="-rotate-45 group-hover:rotate-0 transition-transform" />
-                </button>
+                {/* Qty Controls */}
+                {qty <= 0 ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addItem({
+                        id: cartId,
+                        name: item.name,
+                        price: item.priceValue,
+                      });
+                    }}
+                    className="text-xs font-black border-2 border-slate-900 px-3 py-1.5 rounded-full bg-white shadow-[2px_2px_0_#1A1A1A]"
+                  >
+                    Tambah
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2 border-2 border-slate-900 rounded-full px-2 py-1 bg-white shadow-[2px_2px_0_#1A1A1A]">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setQty(cartId, qty - 1);
+                      }}
+                      className="w-7 h-7 flex items-center justify-center rounded-full border-2 border-slate-900"
+                      aria-label="Kurangi jumlah"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="text-sm font-black min-w-[18px] text-center">
+                      {qty}
+                    </span>
+                    <div className="w-7 h-7 flex items-center justify-center rounded-full border-2 border-slate-900 bg-orange-600 text-white">
+                      <Plus size={14} />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Action Mobile */}
-              <button className="md:hidden ml-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-900 text-white">
-                 <ArrowRight size={16} className="-rotate-45" />
-              </button>
+              <div className="md:hidden ml-4">
+                {qty <= 0 ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addItem({
+                        id: cartId,
+                        name: item.name,
+                        price: item.priceValue,
+                      });
+                    }}
+                    className="text-xs font-black border-2 border-slate-900 px-3 py-1.5 rounded-full bg-white shadow-[2px_2px_0_#1A1A1A]"
+                  >
+                    Tambah
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2 border-2 border-slate-900 rounded-full px-2 py-1 bg-white shadow-[2px_2px_0_#1A1A1A]">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setQty(cartId, qty - 1);
+                      }}
+                      className="w-7 h-7 flex items-center justify-center rounded-full border-2 border-slate-900"
+                      aria-label="Kurangi jumlah"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="text-sm font-black min-w-[18px] text-center">
+                      {qty}
+                    </span>
+                    <div className="w-7 h-7 flex items-center justify-center rounded-full border-2 border-slate-900 bg-orange-600 text-white">
+                      <Plus size={14} />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          ))}
+          );
+          })}
         </div>
 
         {/* --- EMPTY STATE (Jika filter kosong) --- */}

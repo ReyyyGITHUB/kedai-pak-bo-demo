@@ -6,6 +6,10 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 @keyframes testimonial-marquee {
   0% {
     transform: translateX(0);
@@ -57,4 +61,19 @@ body {
   display: inline-block;
   white-space: nowrap;
   animation: marquee-scroll 18s linear infinite;
+}
+
+@keyframes cart-float-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.cart-float {
+  animation: cart-float-in 220ms ease-out;
 }

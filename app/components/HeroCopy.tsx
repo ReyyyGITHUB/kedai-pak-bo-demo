@@ -29,14 +29,17 @@ export default function HeroCopy() {
           </span>
         </p>
 
-        <button className="group flex items-center gap-4 w-fit mt-2 bg-white border-2 border-slate-900 rounded-full px-5 py-2.5 shadow-[4px_4px_0_#1A1A1A] hover:shadow-[2px_2px_0_#1A1A1A] hover:translate-x-[2px] hover:translate-y-[2px] transition-all">
+        <a
+          href="#menu-best-seller"
+          className="group inline-flex items-center gap-4 w-fit mt-2 bg-white border-2 border-slate-900 rounded-full px-5 py-2.5 shadow-[4px_4px_0_#1A1A1A] hover:shadow-[2px_2px_0_#1A1A1A] hover:translate-x-[2px] hover:translate-y-[2px] transition-all active:translate-x-[3px] active:translate-y-[3px]"
+        >
           <div className="w-10 h-10 bg-orange-600 text-white rounded-full flex items-center justify-center border-2 border-slate-900">
             <ArrowRight className="w-4 h-4 -rotate-45 group-hover:translate-x-0.5 transition-transform" />
           </div>
           <span className="font-black text-sm tracking-wide uppercase">
             Pesan Sekarang
           </span>
-        </button>
+        </a>
       </div>
     </div>
   );
