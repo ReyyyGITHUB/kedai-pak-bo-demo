@@ -17,22 +17,21 @@ export default function CheckoutPage() {
 
   const waText = useMemo(() => {
     const lines = items.map(
-      (i) => `- ${i.name} x${i.qty} = ${formatRupiah(i.price * i.qty)}`
+      (i) => `- ${i.name} x${i.qty} = ${formatRupiah(i.price * i.qty)}`,
     );
 
     return (
-      `Halo Kedai Pak Bo, Saya mau pesan!\n` +
-      `Nama Pemesan: ${name || "-"}\n` +
-      `No HP Pemesan: ${phone || "-"}\n` +
-      `Catatan: ke Penjual ${note || "-"}\n\n` +
+      `Halo Kedai Pak Bo, saya mau pesan.\n\n` +
+      `Nama: ${name || "-"}\n` +
+      `No HP: ${phone || "-"}\n\n` +
       `Pesanan:\n` +
-      `${lines.join("\n")}\n` +
-      `Total: ${formatRupiah(total)}`
+      `${lines.join("\n")}\n\n` +
+      `${note ? `Catatan: ${note}\n\n` : ""}` +
+      `Total bayar: ${formatRupiah(total)}`
     );
   }, [items, name, phone, note, total]);
 
   const waLink = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waText)}`;
-  const canSubmit = name.trim().length > 0 && phone.trim().length > 0;
 
   if (items.length === 0) {
     return (
@@ -66,7 +65,10 @@ export default function CheckoutPage() {
           <h2 className="text-lg font-black mb-4">Ringkasan Pesanan</h2>
           <div className="space-y-3">
             {items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between gap-3">
+              <div
+                key={item.id}
+                className="flex items-center justify-between gap-3"
+              >
                 <div>
                   <div className="font-black">{item.name}</div>
                   <div className="text-xs text-slate-500">
@@ -130,17 +132,9 @@ export default function CheckoutPage() {
 
         <div className="mt-8 flex flex-col md:flex-row md:items-center gap-4">
           <a
-            href={canSubmit ? waLink : "#"}
-            target={canSubmit ? "_blank" : undefined}
-            className={`inline-flex items-center justify-center text-sm md:text-base font-black border-2 border-slate-900 px-6 py-3 rounded-full shadow-[4px_4px_0_#1A1A1A] ${
-              canSubmit
-                ? "bg-orange-600 text-white"
-                : "bg-slate-200 text-slate-500 cursor-not-allowed"
-            }`}
-            aria-disabled={!canSubmit}
-            onClick={(e) => {
-              if (!canSubmit) e.preventDefault();
-            }}
+            href={waLink}
+            target="_blank"
+            className="inline-flex items-center justify-center text-sm md:text-base font-black border-2 border-slate-900 px-6 py-3 rounded-full bg-orange-600 text-white shadow-[4px_4px_0_#1A1A1A]"
           >
             Kirim Pesanan via WhatsApp
           </a>
