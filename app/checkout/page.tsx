@@ -32,6 +32,8 @@ export default function CheckoutPage() {
   }, [items, name, phone, note, total]);
 
   const waLink = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waText)}`;
+  const phoneDigits = phone.replace(/\D/g, "");
+  const canSubmit = name.trim().length > 0 && phoneDigits.length >= 12;
 
   if (items.length === 0) {
     return (
@@ -114,13 +116,27 @@ export default function CheckoutPage() {
               placeholder="Nama"
               className="w-full border-2 border-slate-900 rounded-full px-4 py-2 font-bold"
             />
-            <input
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="No HP"
-              type="number"
-              className="w-full border-2 border-slate-900 rounded-full px-4 py-2 font-bold"
-            />
+            <div className="flex flex-col gap-2">
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="No HP (min 12 digit)"
+                type="tel"
+                inputMode="numeric"
+                minLength={12}
+                required
+                className={`w-full border-2 rounded-full px-4 py-2 font-bold ${
+                  phone.length > 0 && phoneDigits.length < 12
+                    ? "border-red-500"
+                    : "border-slate-900"
+                }`}
+              />
+              {phone.length > 0 && phoneDigits.length < 12 && (
+                <p className="text-xs font-bold text-red-600">
+                  Nomor HP minimal 12 digit.
+                </p>
+              )}
+            </div>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
@@ -132,10 +148,23 @@ export default function CheckoutPage() {
 
         <div className="mt-8 flex flex-col md:flex-row md:items-center gap-4">
           <a
-            href={waLink}
-            target="_blank"
-            className="inline-flex items-center justify-center text-sm md:text-base font-black border-2 border-slate-900 px-6 py-3 rounded-full bg-orange-600 text-white shadow-[4px_4px_0_#1A1A1A]"
+            href={canSubmit ? waLink : "#"}
+            target={canSubmit ? "_blank" : undefined}
+            className={`inline-flex items-center justify-center gap-2 text-sm md:text-base font-black border-2 border-slate-900 px-6 py-3 rounded-full shadow-[4px_4px_0_#1A1A1A] ${
+              canSubmit
+                ? "bg-green-600 text-white"
+                : "bg-slate-200 text-slate-500 cursor-not-allowed"
+            }`}
+            aria-disabled={!canSubmit}
+            onClick={(e) => {
+              if (!canSubmit) {
+                e.preventDefault();
+                return;
+              }
+              clear();
+            }}
           >
+            <img alt="WhatsApp" className="w-4 h-4" />
             Kirim Pesanan via WhatsApp
           </a>
           <button
